@@ -1,4 +1,4 @@
-# WordPress UserAgent Utils - Device & Browser Detection
+# WordPress UserAgent Utilities - Device & Browser Detection
 
 A lightweight WordPress library for user agent detection, browser identification, and device type recognition. Perfect for responsive design, analytics, and conditional functionality.
 
@@ -11,7 +11,6 @@ A lightweight WordPress library for user agent detection, browser identification
 * 💻 **OS Detection**: Windows, macOS, iOS, Android, Linux with version support
 * ⚡ **WebView Detection**: Identify in-app browsers and Electron applications
 * 🔍 **Comprehensive Info**: Get all device data in a single method call
-* 📊 **EDD Compatible**: Drop-in replacement for EDD Browser library format
 
 ## Requirements
 
