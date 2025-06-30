@@ -1,0 +1,48 @@
+{
+  "name": "arraypress/wp-useragent-utils",
+  "version": "1.0.0",
+  "description": "A lean PHP library for user agent detection, browser identification, device type detection, and bot recognition with modern browser support",
+  "type": "library",
+  "license": "GPL-2.0-or-later",
+  "homepage": "https://github.com/arraypress/wp-useragent-utils/",
+  "authors": [
+    {
+      "name": "David Sherlock",
+      "homepage": "https://arraypress.com/"
+    }
+  ],
+  "require": {
+    "php": ">=7.4"
+  },
+  "autoload": {
+    "psr-4": {
+      "ArrayPress\\UserAgentUtils\\": "src/"
+    }
+  },
+  "config": {
+    "optimize-autoloader": true,
+    "sort-packages": true,
+    "preferred-install": "dist"
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "support": {
+    "issues": "https://github.com/arraypress/wp-useragent-utils/issues",
+    "source": "https://github.com/arraypress/wp-useragent-utils"
+  },
+  "keywords": [
+    "useragent",
+    "user-agent",
+    "browser-detection",
+    "device-detection",
+    "mobile-detection",
+    "bot-detection",
+    "browser-identification",
+    "operating-system",
+    "device-type",
+    "web-crawler",
+    "user-agent-parser",
+    "browser-version",
+    "arraypress"
+  ]
+}
