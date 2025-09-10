@@ -132,6 +132,24 @@ class UserAgent {
 		'crawler',
 		'bot',
 		'scraper',
+
+		// Programmatic/CLI tools
+		'curl',
+		'wget',
+		'python-requests',
+		'python-urllib',
+		'python',
+		'Go-http-client',
+		'Java',
+		'Ruby',
+		'Perl',
+		'PHP',
+		'node-fetch',
+		'axios',
+		'libwww-perl',
+		'HTTPClient',
+		'PostmanRuntime',
+		'insomnia',
 	];
 
 	/**
@@ -490,6 +508,29 @@ class UserAgent {
 		}
 
 		return version_compare( $detected_version, $version, $operator );
+	}
+
+	/**
+	 * Check if the user agent appears suspicious or malformed.
+	 *
+	 * @param string|null $user_agent Optional user agent string to check.
+	 *
+	 * @return bool True if suspicious.
+	 */
+	public static function is_suspicious( ?string $user_agent = null ): bool {
+		$ua = $user_agent ?? self::get();
+
+		// Empty or very short user agent
+		if ( strlen( $ua ) < 10 ) {
+			return true;
+		}
+
+		// Already detected as bot
+		if ( self::is_bot( $ua ) ) {
+			return true;
+		}
+
+		return false;
 	}
 
 }
