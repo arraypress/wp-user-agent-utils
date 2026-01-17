@@ -212,30 +212,72 @@ class UserAgent {
 	}
 
 	/**
-	 * Check if the user agent is a mobile device.
+	 * Check if the user agent is a tablet device.
 	 *
 	 * @param string|null $user_agent Optional user agent string to check.
 	 *
-	 * @return bool True if mobile device.
+	 * @return bool True if tablet device.
+	 */
+	public static function is_tablet( ?string $user_agent = null ): bool {
+		$ua = $user_agent ?? self::get();
+		if ( empty( $ua ) ) {
+			return false;
+		}
+
+		// iPad is always a tablet
+		if ( stripos( $ua, 'iPad' ) !== false ) {
+			return true;
+		}
+
+		// Android tablet (has Android but not Mobile)
+		if ( stripos( $ua, 'Android' ) !== false && stripos( $ua, 'Mobile' ) === false ) {
+			return true;
+		}
+
+		// Other tablet indicators
+		$tablet_patterns = [ 'Tablet', 'PlayBook', 'Kindle', 'Silk', 'Surface' ];
+		foreach ( $tablet_patterns as $pattern ) {
+			if ( stripos( $ua, $pattern ) !== false ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Check if the user agent is a mobile device (phone, not tablet).
+	 *
+	 * @param string|null $user_agent Optional user agent string to check.
+	 *
+	 * @return bool True if mobile phone device.
 	 */
 	public static function is_mobile( ?string $user_agent = null ): bool {
-		// Use WordPress core function if no specific user agent provided
-		if ( $user_agent === null ) {
-			return wp_is_mobile();
+		$ua = $user_agent ?? self::get();
+		if ( empty( $ua ) ) {
+			return false;
+		}
+
+		// Check for tablet first - tablets are not "mobile" in this context
+		if ( self::is_tablet( $ua ) ) {
+			return false;
 		}
 
 		$mobile_patterns = [
 			'Mobile',
-			'Android',
 			'iPhone',
-			'iPad',
 			'iPod',
+			'Android',
 			'BlackBerry',
-			'Windows Phone'
+			'Windows Phone',
+			'webOS',
+			'Opera Mini',
+			'Opera Mobi',
+			'IEMobile',
 		];
 
 		foreach ( $mobile_patterns as $pattern ) {
-			if ( stripos( $user_agent, $pattern ) !== false ) {
+			if ( stripos( $ua, $pattern ) !== false ) {
 				return true;
 			}
 		}
@@ -251,7 +293,12 @@ class UserAgent {
 	 * @return bool True if desktop device.
 	 */
 	public static function is_desktop( ?string $user_agent = null ): bool {
-		return ! self::is_mobile( $user_agent );
+		$ua = $user_agent ?? self::get();
+		if ( empty( $ua ) ) {
+			return false;
+		}
+
+		return ! self::is_mobile( $ua ) && ! self::is_tablet( $ua ) && ! self::is_bot( $ua );
 	}
 
 	/**
@@ -277,18 +324,28 @@ class UserAgent {
 	 *
 	 * @param string|null $user_agent Optional user agent string to check.
 	 *
-	 * @return string Device type: 'mobile', 'desktop', 'bot', or 'unknown'.
+	 * @return string Device type: 'mobile', 'tablet', 'desktop', 'bot', or 'unknown'.
 	 */
 	public static function get_device_type( ?string $user_agent = null ): string {
-		if ( self::is_bot( $user_agent ) ) {
+		$ua = $user_agent ?? self::get();
+
+		if ( empty( $ua ) ) {
+			return 'unknown';
+		}
+
+		if ( self::is_bot( $ua ) ) {
 			return 'bot';
 		}
 
-		if ( self::is_mobile( $user_agent ) ) {
+		if ( self::is_tablet( $ua ) ) {
+			return 'tablet';
+		}
+
+		if ( self::is_mobile( $ua ) ) {
 			return 'mobile';
 		}
 
-		if ( self::is_desktop( $user_agent ) ) {
+		if ( self::is_desktop( $ua ) ) {
 			return 'desktop';
 		}
 
@@ -327,6 +384,160 @@ class UserAgent {
 		}
 
 		return strcasecmp( $detected_browser, $browser ) === 0;
+	}
+
+	/**
+	 * Check if current OS matches specified OS.
+	 *
+	 * @param string      $os         OS name to check (case-insensitive).
+	 * @param string|null $user_agent Optional user agent string.
+	 *
+	 * @return bool True if OS matches.
+	 */
+	public static function is_os( string $os, ?string $user_agent = null ): bool {
+		$detected_os = self::get_os( $user_agent );
+
+		if ( ! $detected_os ) {
+			return false;
+		}
+
+		return strcasecmp( $detected_os, $os ) === 0;
+	}
+
+	/**
+	 * Check if current device type matches specified type.
+	 *
+	 * @param string      $type       Device type to check (case-insensitive).
+	 * @param string|null $user_agent Optional user agent string.
+	 *
+	 * @return bool True if device type matches.
+	 */
+	public static function is_device_type( string $type, ?string $user_agent = null ): bool {
+		$detected_type = self::get_device_type( $user_agent );
+
+		return strcasecmp( $detected_type, $type ) === 0;
+	}
+
+	/** -------------------------------------------------------------------------
+	 * Options Methods (for building select dropdowns, etc.)
+	 * ------------------------------------------------------------------------ */
+
+	/**
+	 * Get list of detectable browsers.
+	 *
+	 * Returns browser names that can be detected by this library.
+	 * Useful for building select options or validation.
+	 *
+	 * @param bool $as_options If true, returns array of ['value' => '', 'label' => ''] format.
+	 *
+	 * @return array
+	 */
+	public static function get_browsers( bool $as_options = false ): array {
+		$browsers = [
+			'Chrome'            => __( 'Chrome', 'arraypress' ),
+			'Chrome Mobile'     => __( 'Chrome Mobile', 'arraypress' ),
+			'Chrome iOS'        => __( 'Chrome iOS', 'arraypress' ),
+			'Chrome OS'         => __( 'Chrome OS', 'arraypress' ),
+			'Firefox'           => __( 'Firefox', 'arraypress' ),
+			'Firefox iOS'       => __( 'Firefox iOS', 'arraypress' ),
+			'Safari'            => __( 'Safari', 'arraypress' ),
+			'Safari Mobile'     => __( 'Safari Mobile', 'arraypress' ),
+			'Edge'              => __( 'Edge', 'arraypress' ),
+			'Opera'             => __( 'Opera', 'arraypress' ),
+			'Brave'             => __( 'Brave', 'arraypress' ),
+			'Vivaldi'           => __( 'Vivaldi', 'arraypress' ),
+			'Samsung Browser'   => __( 'Samsung Browser', 'arraypress' ),
+			'UC Browser'        => __( 'UC Browser', 'arraypress' ),
+			'DuckDuckGo iOS'    => __( 'DuckDuckGo iOS', 'arraypress' ),
+			'Internet Explorer' => __( 'Internet Explorer', 'arraypress' ),
+			'Android WebView'   => __( 'Android WebView', 'arraypress' ),
+			'iOS WebView'       => __( 'iOS WebView', 'arraypress' ),
+			'Electron'          => __( 'Electron', 'arraypress' ),
+		];
+
+		if ( ! $as_options ) {
+			return $browsers;
+		}
+
+		return self::to_options( $browsers );
+	}
+
+	/**
+	 * Get list of detectable operating systems.
+	 *
+	 * Returns OS names that can be detected by this library.
+	 * Useful for building select options or validation.
+	 *
+	 * @param bool $as_options If true, returns array of ['value' => '', 'label' => ''] format.
+	 *
+	 * @return array
+	 */
+	public static function get_operating_systems( bool $as_options = false ): array {
+		$operating_systems = [
+			'Windows'    => __( 'Windows (any version)', 'arraypress' ),
+			'Windows 10' => __( 'Windows 10', 'arraypress' ),
+			'Windows 11' => __( 'Windows 11', 'arraypress' ),
+			'macOS'      => __( 'macOS', 'arraypress' ),
+			'iOS'        => __( 'iOS', 'arraypress' ),
+			'Android'    => __( 'Android', 'arraypress' ),
+			'Linux'      => __( 'Linux', 'arraypress' ),
+			'Ubuntu'     => __( 'Ubuntu', 'arraypress' ),
+			'Chrome OS'  => __( 'Chrome OS', 'arraypress' ),
+		];
+
+		if ( ! $as_options ) {
+			return $operating_systems;
+		}
+
+		return self::to_options( $operating_systems );
+	}
+
+	/**
+	 * Get list of device types.
+	 *
+	 * Returns device types that can be detected by this library.
+	 * Useful for building select options or validation.
+	 *
+	 * @param bool $as_options If true, returns array of ['value' => '', 'label' => ''] format.
+	 *
+	 * @return array
+	 */
+	public static function get_device_types( bool $as_options = false ): array {
+		$device_types = [
+			'desktop' => __( 'Desktop', 'arraypress' ),
+			'mobile'  => __( 'Mobile', 'arraypress' ),
+			'tablet'  => __( 'Tablet', 'arraypress' ),
+			'bot'     => __( 'Bot/Crawler', 'arraypress' ),
+			'unknown' => __( 'Unknown', 'arraypress' ),
+		];
+
+		if ( ! $as_options ) {
+			return $device_types;
+		}
+
+		return self::to_options( $device_types );
+	}
+
+	/**
+	 * Convert key/value array to options format.
+	 *
+	 * Converts ['key' => 'label'] to [['value' => 'key', 'label' => 'label'], ...]
+	 *
+	 * @param array $items Key/value array.
+	 *
+	 * @return array<array{value: string, label: string}>
+	 */
+	protected static function to_options( array $items ): array {
+		$options = [];
+
+		foreach ( $items as $value => $label ) {
+			$options[] = [
+				'value' => $value,
+				'label' => $label,
+			];
+		}
+
+		return $options;
 	}
 
 }

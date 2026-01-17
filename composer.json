@@ -1,10 +1,10 @@
 {
-  "name": "arraypress/wp-useragent-utils",
+  "name": "arraypress/wp-user-agent-utils",
   "version": "1.0.0",
   "description": "A lean WordPress utility for browser detection, device recognition, and bot identification",
   "type": "library",
   "license": "GPL-2.0-or-later",
-  "homepage": "https://github.com/arraypress/wp-utils-useragent/",
+  "homepage": "https://github.com/arraypress/wp-user-agent-utils/",
   "authors": [
     {
       "name": "David Sherlock",
@@ -19,7 +19,7 @@
       "ArrayPress\\UserAgentUtils\\": "src/"
     },
     "files": [
-      "src/Utilities/Functions.php"
+      "src/Functions.php"
     ]
   },
   "config": {
