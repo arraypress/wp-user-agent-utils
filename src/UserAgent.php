@@ -162,9 +162,11 @@ class UserAgent {
 			return '';
 		}
 
-		$user_agent = wp_unslash( $_SERVER['HTTP_USER_AGENT'] );
-
-		return wp_strip_all_tags( $user_agent );
+		// WordPress runs add_magic_quotes() over $_SERVER as well as the
+		// request superglobals, so the header arrives slashed: unslash before
+		// stripping, or a quoted agent keeps its backslashes.
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- both happen on this line.
+		return wp_strip_all_tags( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) );
 	}
 
 	/**
@@ -539,5 +541,4 @@ class UserAgent {
 
 		return $options;
 	}
-
 }
