@@ -26,7 +26,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	return;
 }
 
-use ArrayPress\UserAgentUtils\UserAgent;
+use ArrayPress\UserAgentUtils\Request;
 
 if ( ! function_exists( 'get_user_agent' ) ) {
 	/**
@@ -36,6 +36,6 @@ if ( ! function_exists( 'get_user_agent' ) ) {
 	 * @return string The sanitized user agent string or empty string.
 	 */
 	function get_user_agent(): string {
-		return UserAgent::get();
+		return Request::agent();
 	}
 }
